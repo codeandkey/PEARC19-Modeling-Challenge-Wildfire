@@ -1,0 +1,8 @@
+DISPLAY = False
+SHOW_STATS = False <-- Can be set to true if you like, but the recommended setting is False.
+TREE_COUNT_X = 40
+TREE_COUNT_Y = 40
+BURN_CHANCE = 85
+FOREST_DENSITY = 80
+NUM_FIRES = 4  <-- Set to 4 instead of 1 when graphing, this increases run speed and prevents initial fires from sputtering out. Helps to make the data more consistant.
+WIND_SPEED = 0 <-- Wind Speed is the least precise variable. Set to 0 to eliminate noise when graphing sensitivity of the other variables.

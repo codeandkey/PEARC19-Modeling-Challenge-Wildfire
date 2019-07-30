@@ -1,0 +1,8 @@
+http://www.sbcounty.gov/calmast/sbc/html/healthy_forest.asp
+Dense forest = 100 to 200 trees per acre 
+Sparse forest = 40 to 60 trees per acre
+
+Fire Resistance By tree type
+(80-95) Poor : Arborvitae, California Bay, Cedars, Giant Sequoia, Cypress, Hemlock, Juniper
+(65-80) Good : Manzanita
+(50-65) Very Good : Ash, Beech, Laurel Cherry, Redwood
