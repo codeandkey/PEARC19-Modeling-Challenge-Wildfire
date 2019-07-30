@@ -425,7 +425,6 @@ def is_init_floor():
 if __name__ == "__main__" :
     run_simulation()
     
-    # TODO: Plot acres burned vs burn chance
     # iterate through different values of BURN_CHANCE without wind at full density
     FOREST_DENSITY = 100
     WIND_SPEED = 0
@@ -438,9 +437,36 @@ if __name__ == "__main__" :
         burn_results.append(forest_destruction)
 
     print('Results for burn_chance: {0}'.format(burn_results))
+
+    print('Press return to start wind speed simulation.')
+    input()
     
-    # TODO: Plot acres burned vs wind
-    
+    FOREST_DENSITY = 100
+    BURN_CHANCE = 85 # standard burn chance
+    wind_results = []
+    for i in range(0, 100):
+        WIND_SPEED = i
+        before, after = run_simulation()
+        forest_destruction = 1 - (after/before)
+        print('Simulated wind speed at {0}: {1}'.format(WIND_SPEED, forest_destruction))
+        wind_results.append(forest_destruction)
+
+    print('Results for wind speed: {0}'.format(wind_results))
+
+    print('Press return to start forest density simulation.')
+    input()
     
     # TODO: Plot acres burned vs forest density
+
+    BURN_CHANCE = 85 # standard burn chance
+    WIND_SPEED = 0
+    density_results = []
+    for i in range(0, 100):
+        FOREST_DENSITY = i
+        before, after = run_simulation()
+        forest_destruction = 1 - (after/before)
+        print('Simulated forest density at {0}: {1}'.format(FOREST_DENSITY, forest_destruction))
+        density_results.append(forest_destruction)
+
+    print('Results for forest density: {0}'.format(density_results))
     
