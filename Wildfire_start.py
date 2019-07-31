@@ -5,6 +5,7 @@
 import matplotlib
 import matplotlib.pyplot as plt 
 import numpy as np
+import sys
 
 #matplotlib.use('TkAgg') # Uncomment this line to plot chart in an external window
 matplotlib.use('module://ipykernel.pylab.backend_inline') # Uncomment this to plot graph as frames in the console
@@ -37,8 +38,8 @@ TREE_COUNT_Y = 40 # Number of trees in y direction
 TIME_INTERVAL = .05 # Length of time step interval (seconds)
 
 # Global Constants - Fire
-BURN_CHANCE = 85 # Burn chance (0-100)
-NUM_FIRES = 1 # Number of starting fires
+BURN_CHANCE = 0  # Burn chance (0-100)
+NUM_FIRES = 4 # Number of starting fires
 
 # Global Constants - Wind
 TOWARDS_TOP = 0 # Wind blows from bottom to top on canvas
@@ -46,7 +47,7 @@ TOWARDS_RIGHT = 1 # Wind blows from left to right on canvas
 TOWARDS_BOTTOM = 2 # Wind blows from top to bottom on canvas
 TOWARDS_LEFT = 3 # Wind blows from right to left on canvas
 WIND_DIRECTION = TOWARDS_BOTTOM # Direction of the wind
-WIND_SPEED = 100 # Magnitude of wind speed (0,100)
+WIND_SPEED = 0 # Magnitude of wind speed (0,100)
 
 # Global Constants - Tree Attributes
 COLOR_GREEN = .2 # matplotlib "tab10" cmap, with vmin = 0, vmax = 1
@@ -129,10 +130,11 @@ def set_init_burning() :
     global init_burn_trees, tree_colors
     # Initialize/clear burning tree array
     init_burn_trees = np.empty(shape=(1,NUM_FIRES), dtype=Tree)
+
     for h in range(NUM_FIRES) :
         # Set random fire starting locations
-        x = np.random.randint(1, TREE_COUNT_X - 1)
-        y = np.random.randint(1, TREE_COUNT_Y - 1)
+        x = np.random.randint(TREE_COUNT_X)
+        y = np.random.randint(TREE_COUNT_Y)
         # Assign trees to burning tree array
         init_burn_trees[0,h] = forest[x,y]
         # Update state for assigned trees
@@ -158,7 +160,7 @@ def set_forest_state(tree, tree_colors) :
 
     
     # Otherwise, the tree is sparse (floor)
-    elif is_init_floor():
+    elif not is_init_tree():
         tree.current_state = FLOOR_STATE
         tree_colors[tree.x, tree.y] = FLOOR_STATE
 
@@ -416,57 +418,69 @@ def run_simulation():
 
 # Returns true if a burn chance passes.
 def burn_chance_happens(burn_chance):
-    return np.random.randint(0, 100) <= burn_chance
+    return np.random.randint(0, 101) <= burn_chance
 
 # Returns true if a burn chance passes.
-def is_init_floor():
-    return np.random.randint(0, 100) > FOREST_DENSITY
+def is_init_tree():
+    return np.random.randint(0, 101) <= FOREST_DENSITY
+
+# Run simulation with certain parameters.
+# Returns the ratio of burned forests. (forest_destruction)
+def run_custom_simulation(bchance=85, fdensity=80, wspeed=0, wdir='down', debug=False):
+    global BURN_CHANCE, FOREST_DENSITY, WIND_SPEED, WIND_DIRECTION
+
+    BURN_CHANCE = bchance
+    FOREST_DENSITY = fdensity
+    WIND_SPEED = wspeed
+
+    if wdir == 'right':
+        WIND_DIRECTION = TOWARDS_RIGHT
+    elif wdir == 'left':
+        WIND_DIRECTION = TOWARDS_LEFT
+    elif wdir == 'down':
+        WIND_DIRECTION = TOWARDS_BOTTOM
+    else:
+        WIND_DIRECTION = TOWARDS_TOP
+
+    if debug:
+        print('Simulation parameters:')
+        print('burn_chance {0}'.format(BURN_CHANCE))
+        print('forest_density {0}'.format(FOREST_DENSITY))
+        print('wind_speed {0}'.format(WIND_SPEED))
+        print('wind_direction {0}'.format(WIND_DIRECTION))
+
+    print('burn chance: {0}'.format(BURN_CHANCE))
+    before, after = run_simulation()
+    forest_destruction = 1 - (after/before)
+
+    if debug:
+        print('Initial: {0} => Final {1}'.format(before, after))
+        print('Destruction result: {0}'.format(forest_destruction))
+
+    return forest_destruction
 
 if __name__ == "__main__" :
-    run_simulation()
-    
-    # iterate through different values of BURN_CHANCE without wind at full density
-    FOREST_DENSITY = 100
-    WIND_SPEED = 0
-    burn_results = []
-    for i in range(0, 100):
-        BURN_CHANCE = i
-        before, after = run_simulation()
-        forest_destruction = 1 - (after/before)
-        print('Simulated burn chance at {0}: {1}'.format(BURN_CHANCE, forest_destruction))
-        burn_results.append(forest_destruction)
+    # Run simulations we want
+    # burn chance
 
-    print('Results for burn_chance: {0}'.format(burn_results))
+    sample_size = 10
 
-    print('Press return to start wind speed simulation.')
-    input()
-    
-    FOREST_DENSITY = 100
-    BURN_CHANCE = 85 # standard burn chance
-    wind_results = []
-    for i in range(0, 100):
-        WIND_SPEED = i
-        before, after = run_simulation()
-        forest_destruction = 1 - (after/before)
-        print('Simulated wind speed at {0}: {1}'.format(WIND_SPEED, forest_destruction))
-        wind_results.append(forest_destruction)
+    bchance_datasets = []
+    for _ in range(0, sample_size):
+        data = []
+        for i in range(0, 101):
+            data.append(run_custom_simulation(85, 80, i, 'right', True))
+        bchance_datasets.append(data)
 
-    print('Results for wind speed: {0}'.format(wind_results))
+    # average bchance data
+    bchance_avg = []
+    for i in range(0, 101):
+        bchance_avg.append(0)
+        for j in range(0, sample_size):
+            bchance_avg[i] += bchance_datasets[j][i]
+        bchance_avg[i] /= sample_size
 
-    print('Press return to start forest density simulation.')
-    input()
-    
-    # TODO: Plot acres burned vs forest density
+    print('Average windspeed data: {0}'.format(bchance_avg))
 
-    BURN_CHANCE = 85 # standard burn chance
-    WIND_SPEED = 0
-    density_results = []
-    for i in range(0, 100):
-        FOREST_DENSITY = i
-        before, after = run_simulation()
-        forest_destruction = 1 - (after/before)
-        print('Simulated forest density at {0}: {1}'.format(FOREST_DENSITY, forest_destruction))
-        density_results.append(forest_destruction)
-
-    print('Results for forest density: {0}'.format(density_results))
-    
+    # Run simulation with debug output
+    run_custom_simulation(bchance, fdensity, wspeed, wdir, True)
